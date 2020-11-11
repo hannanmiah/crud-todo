@@ -20,28 +20,40 @@
             v-model="todo.isCompleted"
             class="checkbox"
           />
-          <button class="info" @click="toggleModal(tod)">Edit</button>
-          <button class="danger" @click="deleteTodo(tod.id)">Delete</button>
+          <button class="info" @click="confirmUpdate(tod)">Edit</button>
+          <button class="danger" @click="confirmDelete(tod)">Delete</button>
         </div>
         <teleport to="body">
           <div v-if="modalVisible && editingId === tod.id">
-          <base-modal>
-            <template #header>
-              Edit Todo List
-            </template>
-            <template #default>
-              <label for="name">Enter New Todo Name</label>
-              <input type="text" name="" id="name" v-model="form.name">
-              <div class="checkbox-area">
-                <input type="checkbox" name="" id=""> Completed
-              </div>
-            </template>
-            <template #footer>
-              <button class="success">Submit</button>
-              <button class="danger" @click="toggleModal(tod)">Cancel</button>
-            </template>
-          </base-modal>
-        </div>
+            <base-modal>
+              <template #header> Edit Todo List </template>
+              <template #default>
+                <label for="name">Enter New Todo Name</label>
+                <input type="text" name="" id="name" v-model="form.name" />
+                <div class="checkbox-area">
+                  <input type="checkbox" name="" id="" v-model="form.isCompleted" /> Completed
+                </div>
+              </template>
+              <template #footer>
+                <button class="success" @click="updateTodo(tod)">Submit</button>
+                <button class="danger" @click="toggleModal(tod)">Cancel</button>
+              </template>
+            </base-modal>
+          </div>
+        </teleport>
+        <teleport to="body">
+          <div v-if="modalVisible && deletingId === tod.id">
+            <base-modal>
+              <template #header> Delete Confirmation </template>
+              <template #default>
+                Are you sure to delete this item?
+              </template>
+              <template #footer>
+                <button class="danger" @click="deleteTodo(tod.id)">Delete</button>
+                <button class="warning" @click="toggleModal(tod)">Go Back</button>
+              </template>
+            </base-modal>
+          </div>
         </teleport>
       </li>
     </ul>
@@ -67,17 +79,18 @@ export default {
   components: {
     BaseModal,
   },
-  setup(_,ctx) {
+  setup(_, ctx) {
     const todos = ref([]);
     const toggleMode = ref("todoList");
     const todosLength = computed(() => todos.value.length);
     const modalVisible = ref(false);
-    const editingId = ref(null)
+    const editingId = ref(null);
+    const deletingId = ref(null)
     const form = reactive({
       id: null,
-      name: '',
-      isCompleted: false
-    })
+      name: "",
+      isCompleted: false,
+    });
     const todo = reactive({
       name: "",
       isCompleted: false,
@@ -101,16 +114,47 @@ export default {
       }
     }
 
+    function updateTodo(todo) {
+      if (todo.name == form.name && todo.isCompleted == form.isCompleted) {
+        alert("Please, Enter Some Changes!");
+      } else {
+        todos.value = todos.value.map((v) => {
+          if (v.id == form.id) {
+            return {
+              id: form.id,
+              name: form.name,
+              isCompleted: form.isCompleted,
+            };
+          }
+
+          return v;
+        });
+
+        toggleModal(form)
+      }
+    }
+
     function deleteTodo(id) {
       todos.value = todos.value.filter((val) => val.id !== id);
     }
 
+    function confirmDelete(todo){
+      modalVisible.value = true
+      deletingId.value = todo.id
+    }
+
+    function confirmUpdate(todo){
+      modalVisible.value = true
+      editingId.value = todo.id
+      form.id = todo.id;
+      form.name = todo.name;
+      form.isCompleted = todo.isCompleted;
+    }
+
     function toggleModal(todo) {
       modalVisible.value = !modalVisible.value;
-      editingId.value = todo.id
-      form.id = todo.id
-      form.name = todo.name
-      form.isCompleted = todo.isCompleted
+      editingId.value = null
+      deletingId.value = null
     }
 
     return {
@@ -120,10 +164,14 @@ export default {
       toggleTodo,
       toggleMode,
       addTodo,
+      confirmUpdate,
+      updateTodo,
+      confirmDelete,
       deleteTodo,
       todo,
       modalVisible,
       editingId,
+      deletingId,
       toggleModal,
     };
   },
