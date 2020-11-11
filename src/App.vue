@@ -1,15 +1,36 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Hello Vue 3.0 + Vite" />
+  <todo-list></todo-list>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import TodoList from "./components/TodoList.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    TodoList,
+  },
+};
 </script>
+
+<style>
+  .container {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px rgb(216, 216, 216), -5px -5px 5px rgb(216, 216, 216);
+  }
+
+  .nav {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  button {
+    display: inline-block;
+    padding: 5px;
+    background: green;
+    border: none;
+  }
+</style>
