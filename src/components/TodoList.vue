@@ -11,6 +11,12 @@
 	<transition name="todo" mode="out-in">
 		<div class="container" v-if="toggleMode === 'todoList'">
 			<div v-if="todosLength">
+				<ul>
+					<li class="todo-heading">
+						<div class="todo-content-header">Name</div>
+						<div class="todo-content-header">Actions</div>
+					</li>
+				</ul>
 				<ul v-for="tod in todos" :key="tod.id">
 					<li>
 						<div :class="{ completed: tod.isCompleted }">{{ tod.name }}</div>
@@ -74,7 +80,7 @@
 									Are you sure to delete {{ tod.name }}?
 								</template>
 								<template #footer>
-									<button class="danger" @click="deleteTodo(tod.id)">
+									<button class="danger" @click="deleteTodo(tod)">
 										Delete
 									</button>
 									<button class="warning" @click="toggleModal(tod)">
@@ -169,8 +175,9 @@
 				}
 			}
 
-			function deleteTodo(id) {
-				todos.value = todos.value.filter((val) => val.id !== id);
+			function deleteTodo(todo) {
+				todos.value = todos.value.filter((val) => val.id !== todo.id);
+				toggleModal(todo)
 			}
 
 			function confirmDelete(todo) {
@@ -276,6 +283,17 @@
 	button {
 		margin-left: 5px;
 		border-radius: 5px;
+	}
+
+	.todo-heading {
+		border: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.todo-heading .todo-content-header {
+		font-weight: bold;
+		font-size: 1rem;
 	}
 
 	.todo-enter-from {
