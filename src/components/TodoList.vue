@@ -1,80 +1,109 @@
 <template>
 	<div class="nav">
 		Simple Todo List App
-		<button @click="toggleTodo('addTodo')" v-if="toggleMode === 'todoList'">
-			Add Todo
-		</button>
-		<button @click="toggleTodo('todoList')" v-if="toggleMode === 'addTodo'">
-			Todo List
-		</button>
+		<transition name="todo" mode="out-in">
+			<button @click="toggleTodo('addTodo')" v-if="toggleMode === 'todoList'">
+				Add Todo
+			</button>
+			<button @click="toggleTodo('todoList')" v-else>Todo List</button>
+		</transition>
 	</div>
-	<div class="container" v-if="toggleMode === 'todoList' && todosLength">
-		<ul v-for="tod in todos" :key="tod.id">
-			<li>
-				<div :class="{ completed: tod.isCompleted }">{{ tod.name }}</div>
-				<div class="action">
-					<input
-						type="checkbox"
-						:id="tod.id"
-						:name="'completed-' + tod.id"
-						v-model="todo.isCompleted"
-						class="checkbox"
-					/>
-					<button class="info" @click="confirmUpdate(tod)">Edit</button>
-					<button class="danger" @click="confirmDelete(tod)">Delete</button>
-				</div>
-				<teleport to="body">
-					<base-modal
-						:modalIsVisible="modalVisible"
-						v-if="modalVisible && editingId === tod.id"
-					>
-						<template #header> Edit Todo List </template>
-						<template #default>
-							<label for="name">Enter New Todo Name</label>
-							<input type="text" name="" id="name" v-model="form.name" />
-							<div class="checkbox-area">
-								<input
-									type="checkbox"
-									name=""
-									id=""
-									v-model="form.isCompleted"
-								/>
-								Completed
-							</div>
-						</template>
-						<template #footer>
-							<button class="success" @click="updateTodo(tod)">Submit</button>
-							<button class="danger" @click="toggleModal(tod)">Cancel</button>
-						</template>
-					</base-modal>
-				</teleport>
-				<teleport to="body">
-					<base-modal
-						:modalIsVisible="modalVisible"
-						v-if="modalVisible && deletingId === tod.id"
-					>
-						<template #header> Delete Confirmation </template>
-						<template #default> Are you sure to delete this item? </template>
-						<template #footer>
-							<button class="danger" @click="deleteTodo(tod.id)">Delete</button>
-							<button class="warning" @click="toggleModal(tod)">Go Back</button>
-						</template>
-					</base-modal>
-				</teleport>
-			</li>
-		</ul>
-	</div>
-	<div class="container" v-if="toggleMode === 'addTodo'">
-		<div class="form-control">
-			<form @submit.prevent="addTodo">
-				<input v-model="todo.name" type="text" placeholder="Enter Todo Name" />
-				<button type="submit">Add</button>
-			</form>
+	<transition name="todo" mode="out-in">
+		<div class="container" v-if="toggleMode === 'todoList'">
+			<div v-if="todosLength">
+				<ul v-for="tod in todos" :key="tod.id">
+					<li>
+						<div :class="{ completed: tod.isCompleted }">{{ tod.name }}</div>
+						<div class="action">
+							<input
+								type="checkbox"
+								:id="tod.id"
+								:name="'completed-' + tod.id"
+								class="checkbox"
+								checked
+								v-if="tod.isCompleted"
+								@click="toggleChecked(tod.id)"
+							/>
+							<input
+								type="checkbox"
+								name=""
+								id=""
+								v-else
+								class="checkbox"
+								@click="toggleChecked(tod.id)"
+							/>
+							<button class="info" @click="confirmUpdate(tod)">Edit</button>
+							<button class="danger" @click="confirmDelete(tod)">Delete</button>
+						</div>
+						<teleport to="body">
+							<base-modal
+								:modalIsVisible="modalVisible"
+								v-if="modalVisible && editingId === tod.id"
+							>
+								<template #header> Edit Todo List </template>
+								<template #default>
+									<label for="name">Enter New Todo Name</label>
+									<input type="text" name="" id="name" v-model="form.name" />
+									<div class="checkbox-area">
+										<input
+											type="checkbox"
+											name=""
+											id=""
+											v-model="form.isCompleted"
+										/>
+										Completed
+									</div>
+								</template>
+								<template #footer>
+									<button class="success" @click="updateTodo(tod)">
+										Submit
+									</button>
+									<button class="danger" @click="toggleModal(tod)">
+										Cancel
+									</button>
+								</template>
+							</base-modal>
+						</teleport>
+						<teleport to="body">
+							<base-modal
+								:modalIsVisible="modalVisible"
+								v-if="modalVisible && deletingId === tod.id"
+							>
+								<template #header> Delete Confirmation </template>
+								<template #default>
+									Are you sure to delete {{ tod.name }}?
+								</template>
+								<template #footer>
+									<button class="danger" @click="deleteTodo(tod.id)">
+										Delete
+									</button>
+									<button class="warning" @click="toggleModal(tod)">
+										Go Back
+									</button>
+								</template>
+							</base-modal>
+						</teleport>
+					</li>
+				</ul>
+			</div>
+			<div v-else>
+				<h5>Nothing in todos to display!</h5>
+			</div>
 		</div>
-	</div>
-	<div class="container" v-if="!todosLength && toggleMode === 'todoList'">
-		<h5>Nothing in todos</h5>
-	</div>
+
+		<div class="container" v-else>
+			<div class="form-control">
+				<form @submit.prevent="addTodo">
+					<input
+						v-model="todo.name"
+						type="text"
+						placeholder="Enter Todo Name"
+					/>
+					<button type="submit">Add</button>
+				</form>
+			</div>
+		</div>
+	</transition>
 </template>
 
 <script>
@@ -157,6 +186,20 @@
 				form.isCompleted = todo.isCompleted;
 			}
 
+			function toggleChecked(id) {
+				todos.value = todos.value.map((todo) => {
+					if (todo.id == id) {
+						return {
+							name: todo.name,
+							id: todo.id,
+							isCompleted: !todo.isCompleted,
+						};
+					}
+
+					return todo;
+				});
+			}
+
 			function toggleModal(todo) {
 				modalVisible.value = !modalVisible.value;
 				editingId.value = null;
@@ -166,6 +209,7 @@
 			return {
 				todos,
 				form,
+				todo,
 				todosLength,
 				toggleTodo,
 				toggleMode,
@@ -174,7 +218,7 @@
 				updateTodo,
 				confirmDelete,
 				deleteTodo,
-				todo,
+				toggleChecked,
 				modalVisible,
 				editingId,
 				deletingId,
@@ -234,15 +278,27 @@
 		border-radius: 5px;
 	}
 
-	.v-enter-from {
+	.todo-enter-from {
 		opacity: 0;
-		transform: translateY(-30px);
+		transform: translateX(-100px);
 	}
-	.v-enter-active {
+	.todo-enter-active {
 		transition: all 0.3s ease-in;
 	}
-	.v-enter-to {
+	.todo-enter-to {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateX(0);
+	}
+
+	.todo-leave-from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	.todo-leave-active {
+		transition: all 0.3s linear;
+	}
+	.todo-leave-to {
+		opacity: 0;
+		transform: translateX(-100px);
 	}
 </style>
