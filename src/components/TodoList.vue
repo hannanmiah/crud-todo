@@ -49,7 +49,13 @@
 								<template #header> Edit Todo List </template>
 								<template #default>
 									<label for="name">Enter New Todo Name</label>
-									<input type="text" name="" id="name" v-model="form.name" />
+									<input
+										type="text"
+										name=""
+										id="name"
+										v-model="form.name"
+										@keypress.enter="updateTodo(tod)"
+									/>
 									<div class="checkbox-area">
 										<input
 											type="checkbox"
@@ -100,11 +106,16 @@
 		<div class="container" v-else>
 			<div class="form-control">
 				<form @submit.prevent="addTodo">
+					<label for="name">Enter Todo Name: </label>
 					<input
 						v-model="todo.name"
 						type="text"
 						placeholder="Enter Todo Name"
+						id="name"
 					/>
+					<div class="checkbox-area">
+						<input class="checkbox" type="checkbox" v-model="todo.isCompleted" name="" id=""> Completed
+					</div>
 					<button type="submit">Add</button>
 				</form>
 			</div>
@@ -177,7 +188,7 @@
 
 			function deleteTodo(todo) {
 				todos.value = todos.value.filter((val) => val.id !== todo.id);
-				toggleModal(todo)
+				toggleModal(todo);
 			}
 
 			function confirmDelete(todo) {
@@ -264,6 +275,44 @@
 	label {
 		display: block;
 		margin: 5px;
+	}
+
+	.form-control {
+		max-width: 400px;
+		border: 1px solid #ccc;
+		padding: 10px;
+		margin: 5px auto;
+	}
+
+	.form-control label {
+		display: block;
+		margin-bottom: 5px;
+		text-align: start;
+		margin-left: 0;
+	}
+
+	.form-control input[type=text] {
+		width: 100%;
+		padding: 10px;
+	}
+
+	.form-control form input[type=checkbox] {
+		display: inline-block;
+		padding: 5px;
+	}
+
+	.form-control .checkbox-area {
+		display: flex;
+		justify-content: center;
+	}
+
+	.form-control button {
+		display: block;
+		margin: 5px auto;
+		padding: 10px;
+		width: 100%;
+		border-radius: 10px;
+		cursor: pointer;
 	}
 
 	.checkbox {

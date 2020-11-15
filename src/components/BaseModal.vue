@@ -71,6 +71,7 @@ import { onMounted, onUnmounted, onUpdated, ref } from 'vue';
 	.modal-enter-from {
 		opacity: 0;
 		transform: translateY(-30px);
+		transform: scale(0.5);
 	}
 	.modal-enter-active {
 		transition: all 0.3s ease-in;
@@ -78,11 +79,13 @@ import { onMounted, onUnmounted, onUpdated, ref } from 'vue';
 	.modal-enter-to {
 		opacity: 1;
 		transform: translateY(0);
+		transform: scale(1);
 	}
 
   .modal-leave-from {
     opacity: 1;
     transform: translateY(0);
+	transform: scale(1);
   }
 
   .modal-leave-active {
@@ -92,5 +95,6 @@ import { onMounted, onUnmounted, onUpdated, ref } from 'vue';
   .modal-leave-to {
     opacity: 0;
     transform: translateY(-30px);
+	transform: scale(0.5);
   }
 </style>
