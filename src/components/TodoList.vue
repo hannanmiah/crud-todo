@@ -108,7 +108,7 @@
 				<form @submit.prevent="addTodo">
 					<label for="name">Enter Todo Name: </label>
 					<input
-						v-model="todo.name"
+						v-model.trim="todo.name"
 						type="text"
 						placeholder="Enter Todo Name"
 						id="name"
@@ -304,6 +304,7 @@
 	.form-control .checkbox-area {
 		display: flex;
 		justify-content: center;
+		margin: 5px;
 	}
 
 	.form-control button {
